@@ -1,27 +1,22 @@
-import clientPromise from '@/lib/db';
-import { NextRequest, NextResponse } from 'next/server';
+import clientPromise from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
 
-interface Context {
-  params: {
-    id: string;
-  };
-}
-
-export async function POST(
-  request: NextRequest,
-  context: Context
-) {
-  const { params } = context; 
-  const { id } = params;
-  const { word, comment } = await request.json();
-
-  // Logging for debugging
-  console.log(`Saving comment for document ${id}: ${word} - ${comment}`);
-
+export async function POST(request: NextRequest) {
   try {
+    const { id, word, comment } = await request.json(); // Extract `id` from the body
+
+    if (!id || !word || !comment) {
+      return NextResponse.json(
+        { error: "Missing required fields: id, word, or comment" },
+        { status: 400 }
+      );
+    }
+
+    console.log(`Saving comment for document ${id}: ${word} - ${comment}`);
+
     const client = await clientPromise;
-    const db = client.db('documentViewer');
-    const commentsCollection = db.collection('comments');
+    const db = client.db("documentViewer");
+    const commentsCollection = db.collection("comments");
 
     await commentsCollection.updateOne(
       { documentId: id, word },
@@ -31,7 +26,10 @@ export async function POST(
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error('Error saving comment:', error);
-    return NextResponse.json({ error: 'Error saving comment' }, { status: 500 });
+    console.error("Error saving comment:", error);
+    return NextResponse.json(
+      { error: "Error saving comment" },
+      { status: 500 }
+    );
   }
 }
