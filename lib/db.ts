@@ -1,36 +1,42 @@
-import { MongoClient, ObjectId } from 'mongodb'
+import { MongoClient, ObjectId } from 'mongodb';
 
+// Ensure the required environment variable is available
 if (!process.env.MONGODB_URI) {
-  throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
+  throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
 }
 
-const uri = process.env.MONGODB_URI
-const options = {}
+const uri: string = process.env.MONGODB_URI;
+const options: Record<string, unknown> = {};
 
-let client
-let clientPromise: Promise<MongoClient>
+let client: MongoClient;
+let clientPromise: Promise<MongoClient>;
+
+// Extend the Node.js global object to include a custom MongoDB client promise type
+declare global {
+  // eslint-disable-next-line no-var
+  var _mongoClientPromise: Promise<MongoClient> | undefined;
+}
 
 if (process.env.NODE_ENV === 'development') {
-  // In development mode, use a global variable so that the value
-  // is preserved across module reloads caused by HMR (Hot Module Replacement).
+  // Use a global variable in development mode for Hot Module Replacement (HMR)
   if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options)
-    global._mongoClientPromise = client.connect()
+    client = new MongoClient(uri, options);
+    global._mongoClientPromise = client.connect();
   }
-  clientPromise = global._mongoClientPromise
+  clientPromise = global._mongoClientPromise!;
 } else {
-  // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri, options)
-  clientPromise = client.connect()
+  // Create a new client in production
+  client = new MongoClient(uri, options);
+  clientPromise = client.connect();
 }
 
+// Define the interface for PositionComment
 export interface PositionComment {
-  _id?: ObjectId
-  documentId: string
-  startOffset: number
-  endOffset: number
-  comment: string
+  _id?: ObjectId; // Optional MongoDB ObjectId
+  documentId: string;
+  startOffset: number;
+  endOffset: number;
+  comment: string;
 }
 
-export default clientPromise
-
+export default clientPromise;
