@@ -6,7 +6,7 @@ import clientPromise from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
-    const { id } = await request.json(); 
+    const { id } = await request.json();
 
     if (!id) {
       return NextResponse.json(
@@ -44,3 +44,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

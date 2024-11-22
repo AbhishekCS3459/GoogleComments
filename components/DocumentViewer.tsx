@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 export default function DocumentViewer() {
   const [content, setContent] = useState("");
@@ -18,7 +17,11 @@ export default function DocumentViewer() {
   useEffect(() => {
     const fetchDocument = async () => {
       if (params.id) {
-        const response = await fetch(`/api/document/${params.id}`);
+        const response = await fetch(`/api/document`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: params.id }),
+        });
         if (response.ok) {
           const { content, comments } = await response.json();
           setContent(content);
@@ -36,14 +39,14 @@ export default function DocumentViewer() {
   };
 
   const handleCommentSubmit = async () => {
-    if (selectedWord && commentInput) {
+    if (selectedWord && commentInput && params.id) {
       const updatedComments = { ...comments, [selectedWord]: commentInput };
       setComments(updatedComments);
 
-      await fetch(`/api/comment/${params.id}`, {
+      await fetch(`/api/comment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ word: selectedWord, comment: commentInput }),
+        body: JSON.stringify({ id: params.id, word: selectedWord, comment: commentInput }),
       });
 
       setSelectedWord("");
@@ -70,7 +73,6 @@ export default function DocumentViewer() {
                   >${word}</span>`;
                 }),
               }}
-              
               onClick={(e) => {
                 const target = e.target as HTMLElement;
                 if (target.classList.contains("word")) {
@@ -115,3 +117,4 @@ export default function DocumentViewer() {
     </div>
   );
 }
+

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useDocumentStore } from "@/lib/store";
-
+import { useParams } from "next/navigation";
 
 interface CommentSidebarProps {
   selectedRange: { start: number; end: number } | null;
@@ -14,6 +14,7 @@ interface CommentSidebarProps {
 export const CommentSidebar: React.FC<CommentSidebarProps> = ({ selectedRange, onCommentSubmit }) => {
   const [commentInput, setCommentInput] = useState<string>("");
   const { comments, updateComment, deleteComment } = useDocumentStore();
+  const params = useParams();
 
   const handleCommentSubmit = (): void => {
     if (commentInput.trim()) {
@@ -24,12 +25,24 @@ export const CommentSidebar: React.FC<CommentSidebarProps> = ({ selectedRange, o
 
   const handleCommentUpdate = async (id: string, newComment: string): Promise<void> => {
     updateComment(id, newComment.trim());
-    // TODO: Add API call to update comment in the backend
+    if (params.id) {
+      await fetch(`/api/comment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: params.id, commentId: id, comment: newComment.trim() }),
+      });
+    }
   };
 
   const handleCommentDelete = async (id: string): Promise<void> => {
     deleteComment(id);
-    // TODO: Add API call to delete comment from the backend
+    if (params.id) {
+      await fetch(`/api/comment`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: params.id, commentId: id }),
+      });
+    }
   };
 
   return (
@@ -89,3 +102,4 @@ export const CommentSidebar: React.FC<CommentSidebarProps> = ({ selectedRange, o
     </Card>
   );
 };
+

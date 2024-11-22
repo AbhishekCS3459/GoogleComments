@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { id, word, comment } = await request.json(); // Extract `id` from the body
+    const { id, word, comment } = await request.json();
 
     if (!id || !word || !comment) {
       return NextResponse.json(
